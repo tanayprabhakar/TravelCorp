@@ -3,6 +3,8 @@ from datetime import datetime
 from src.agent import EmailAgent
 from src.audit import AuditLogger
 import os
+import smtplib
+from email.message import EmailMessage
 
 class EscalationEngine:
     def __init__(self, data_path='data/invoices.csv'):
@@ -33,6 +35,37 @@ class EscalationEngine:
             return 4, "Stern & Urgent", "Final reminder before escalation. CTA: Pay immediately or call us"
         else:
             return 5, "Escalation Flag", "Flag for Legal. Human review required; no auto email. CTA: Assign to finance manager"
+
+    def send_email(self, to_email, subject, body):
+        smtp_server = os.getenv("SMTP_SERVER")
+        smtp_port = os.getenv("SMTP_PORT")
+        smtp_username = os.getenv("SMTP_USERNAME")
+        smtp_password = os.getenv("SMTP_PASSWORD")
+        sender_email = os.getenv("SENDER_EMAIL")
+
+        if not all([smtp_server, smtp_port, smtp_username, smtp_password, sender_email]):
+            print(f"\n--- DRY RUN: SENDING EMAIL (SMTP not configured) ---")
+            print(f"To: {to_email}")
+            print(f"Subject: {subject}")
+            print(f"Body:\n{body}")
+            print(f"----------------------------------------------------\n")
+            return True, "dry-run"
+
+        msg = EmailMessage()
+        msg.set_content(body)
+        msg['Subject'] = subject
+        msg['From'] = sender_email
+        msg['To'] = to_email
+
+        try:
+            with smtplib.SMTP(smtp_server, int(smtp_port)) as server:
+                server.starttls()
+                server.login(smtp_username, smtp_password)
+                server.send_message(msg)
+            return True, "sent"
+        except Exception as e:
+            print(f"SMTP Error: {e}")
+            return False, str(e)
 
     def process_invoices(self):
         if not os.path.exists(self.data_path):
@@ -77,21 +110,21 @@ class EscalationEngine:
             )
 
             if email_output:
-                print(f"\n--- DRY RUN: SENDING EMAIL ---")
-                print(f"To: {row['contact_email']}")
-                print(f"Subject: {email_output.subject}")
-                print(f"Body:\n{email_output.body}")
-                print(f"------------------------------\n")
+                success, status = self.send_email(row['contact_email'], email_output.subject, email_output.body)
                 
-                # Log action
-                self.audit_logger.log_action(
-                    invoice_no=row['invoice_no'],
-                    client_name=row['client'],
-                    action_taken=f"Sent Stage {stage} Email",
-                    tone_used=tone_name,
-                    email_subject=email_output.subject,
-                    email_body=email_output.body
-                )
+                if success:
+                    # Log action
+                    action_str = f"Sent Stage {stage} Email ({status})"
+                    self.audit_logger.log_action(
+                        invoice_no=row['invoice_no'],
+                        client_name=row['client'],
+                        action_taken=action_str,
+                        tone_used=tone_name,
+                        email_subject=email_output.subject,
+                        email_body=email_output.body
+                    )
+                else:
+                    print(f"Failed to send email for {row['invoice_no']}: {status}")
             else:
                 print(f"Failed to generate email for {row['invoice_no']}")
 

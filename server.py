@@ -190,17 +190,21 @@ def generate_single():
     )
 
     if email_output:
-        audit_logger.log_action(
-            invoice_no=row['invoice_no'],
-            client_name=row['client'],
-            action_taken=f'Sent Stage {stage} Email',
-            tone_used=tone_name,
-            email_subject=email_output.subject,
-            email_body=email_output.body
-        )
-        return jsonify({
-            'status': 'sent',
-            'invoice_no': invoice_no,
+        success, status = engine.send_email(row['contact_email'], email_output.subject, email_output.body)
+        
+        if success:
+            action_str = f"Sent Stage {stage} Email ({status})"
+            audit_logger.log_action(
+                invoice_no=row['invoice_no'],
+                client_name=row['client'],
+                action_taken=action_str,
+                tone_used=tone_name,
+                email_subject=email_output.subject,
+                email_body=email_output.body
+            )
+            return jsonify({
+                'status': 'sent' if status == 'sent' else 'dry-run',
+                'invoice_no': invoice_no,
             'stage': stage,
             'tone': tone_name,
             'invoice': {
@@ -215,6 +219,8 @@ def generate_single():
                 'body': email_output.body
             }
         })
+        else:
+            return jsonify({'error': f'Failed to send email: {status}'}), 500
     else:
         return jsonify({'error': 'Failed to generate email'}), 500
 
@@ -259,15 +265,21 @@ def generate_all():
             )
 
             if email_output:
-                audit_logger.log_action(
-                    invoice_no=row['invoice_no'],
-                    client_name=row['client'],
-                    action_taken=f'Sent Stage {stage} Email',
-                    tone_used=tone_name,
-                    email_subject=email_output.subject,
-                    email_body=email_output.body
-                )
-                results.append({'invoice_no': row['invoice_no'], 'status': 'sent', 'stage': stage})
+                success, status = engine.send_email(row['contact_email'], email_output.subject, email_output.body)
+                
+                if success:
+                    action_str = f"Sent Stage {stage} Email ({status})"
+                    audit_logger.log_action(
+                        invoice_no=row['invoice_no'],
+                        client_name=row['client'],
+                        action_taken=action_str,
+                        tone_used=tone_name,
+                        email_subject=email_output.subject,
+                        email_body=email_output.body
+                    )
+                    results.append({'invoice_no': row['invoice_no'], 'status': 'sent' if status == 'sent' else 'dry-run', 'stage': stage})
+                else:
+                    results.append({'invoice_no': row['invoice_no'], 'status': 'error', 'detail': f'Sending failed: {status}'})
             else:
                 results.append({'invoice_no': row['invoice_no'], 'status': 'error', 'detail': 'Generation failed'})
         except Exception as e:
