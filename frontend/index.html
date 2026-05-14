@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Credit follow-up dashboard for managing overdue invoices and generating escalation emails.">
+  <title>Credit Follow-Up — TravelCorp Finance</title>
+  <link rel="stylesheet" href="/style.css">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>T</text></svg>">
+</head>
+<body>
+
+  <!-- Nav -->
+  <nav class="topnav">
+    <div class="topnav-brand">
+      <svg viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <rect width="20" height="20" rx="4" fill="#5e6ad2"/>
+        <path d="M5 14V6h2.5v3.2h5V6H15v8h-2.5v-3.2h-5V14H5z" fill="#fff"/>
+      </svg>
+      TravelCorp Finance
+    </div>
+    <div class="topnav-actions">
+      <button class="btn btn-secondary btn-sm" id="btn-refresh" onclick="loadDashboard()">Refresh</button>
+    </div>
+  </nav>
+
+  <!-- Toast container -->
+  <div class="toast-container" id="toast-container"></div>
+
+  <!-- Setup -->
+  <div class="setup-panel" id="setup-wizard">
+    <h2>Connect your API key</h2>
+    <p>This tool requires an API key to draft follow-up emails. Paste your key below — it stays on this machine and is never transmitted externally.</p>
+    <div class="input-row">
+      <input type="password" class="text-input" id="api-key-input" placeholder="sk-proj-..." autocomplete="off">
+      <button class="btn btn-primary" id="save-key-btn" onclick="saveApiKey()">Save</button>
+    </div>
+    <p class="hint">Need a key? <a href="https://platform.openai.com/api-keys" target="_blank" rel="noopener">platform.openai.com</a></p>
+  </div>
+
+  <!-- Dashboard -->
+  <div class="app" id="main-dashboard" style="display:none">
+
+    <div style="height:24px"></div>
+
+    <!-- Stats -->
+    <div class="stats-row">
+      <div class="stat-tile">
+        <div class="label">Total Invoices</div>
+        <div class="value accent" id="stat-total">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Overdue</div>
+        <div class="value" id="stat-overdue">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Actionable</div>
+        <div class="value green" id="stat-actionable">—</div>
+      </div>
+      <div class="stat-tile">
+        <div class="label">Escalated</div>
+        <div class="value red" id="stat-escalated">—</div>
+      </div>
+    </div>
+
+    <!-- Toolbar -->
+    <div class="toolbar">
+      <button class="btn btn-primary" id="btn-generate-all" onclick="generateAll()">Process all</button>
+      <label class="file-label">
+        Upload CSV
+        <input type="file" accept=".csv" onchange="handleCsvUpload(event)">
+      </label>
+      <button class="btn btn-secondary" id="btn-regen-data" onclick="regenerateData()">Reset data</button>
+      <div class="toolbar-spacer"></div>
+    </div>
+
+    <!-- Invoices grid -->
+    <div class="section-heading">Invoices <span class="count" id="inv-count"></span></div>
+    <div class="invoice-grid" id="invoice-grid">
+      <div class="empty-state" style="grid-column: 1 / -1;">
+        <p>Loading…</p>
+      </div>
+    </div>
+
+    <!-- Audit log -->
+    <div class="section-heading">Audit log <span class="count" id="audit-count"></span></div>
+    <div class="table-wrap">
+      <table class="inv-table">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Invoice</th>
+            <th>Client</th>
+            <th>Action</th>
+            <th>Tone</th>
+            <th class="hide-mobile">Subject</th>
+          </tr>
+        </thead>
+        <tbody id="audit-tbody">
+          <tr class="empty-row"><td colspan="6">No records yet</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+  </div>
+
+  <!-- Email preview modal -->
+  <div class="modal-scrim" id="email-modal">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3>Email preview</h3>
+        <button class="modal-close" onclick="closeModal()">✕</button>
+      </div>
+      <div class="email-meta-row">
+        <span>To: <strong id="modal-email-to"></strong></span>
+        <span>Tone: <strong id="modal-email-tone"></strong></span>
+        <span id="modal-email-stage"></span>
+      </div>
+      <div class="email-block">
+        <div class="email-block-label">Subject</div>
+        <div class="email-block-value" id="modal-email-subject"></div>
+      </div>
+      <div class="email-block">
+        <div class="email-block-label">Body</div>
+        <div class="email-block-value" id="modal-email-body"></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn btn-secondary" onclick="closeModal()">Close</button>
+        <button class="btn btn-primary" onclick="copyEmailToClipboard()">Copy to clipboard</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,7 @@
+client,contact_email,amount,due_date,invoice_no,follow_up_count
+TechCorp Solutions,billing@techcorp.example.com,15000.0,2026-05-19,INV-2024-001,0
+Rajesh Kapoor,rajesh@example.com,45000.0,2026-05-10,INV-2024-002,0
+Global Logistics,accounts@globallogistics.example.com,8200.0,2026-05-04,INV-2024-003,1
+Sunrise Retail,finance@sunriseretail.example.com,12500.0,2026-04-26,INV-2024-004,2
+Apex Manufacturing,payables@apex.example.com,67000.0,2026-04-16,INV-2024-005,3
+Defunct Co.,admin@defunct.example.com,5400.0,2026-03-30,INV-2024-006,4

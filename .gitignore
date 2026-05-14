@@ -1,0 +1,22 @@
+# Dependencies
+venv/
+__pycache__/
+*.pyc
+
+# Environment
+.env
+
+# Data (keep example, ignore runtime)
+data/audit.db
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+
+# Wheels
+*.whl
+pypdf_pkg/
