@@ -1,4 +1,4 @@
-# Credit Follow-Up System | TravelCorp Finance
+# Credit Follow-Up System | Travel Corporation India
 
 ## Overview
 A credit follow-up tool that generates escalation emails for overdue invoices. The system applies a structured tone escalation matrix — starting with friendly reminders and progressing through formal notices — based on how many days each invoice is overdue.
