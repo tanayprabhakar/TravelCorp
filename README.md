@@ -3,6 +3,8 @@
 ## Overview
 A credit follow-up tool that generates escalation emails for overdue invoices. The system applies a structured tone escalation matrix — starting with friendly reminders and progressing through formal notices — based on how many days each invoice is overdue.
 
+![Dashboard](dashboard.png)
+
 Features:
 - **Data Ingestion:** Reads overdue invoices from CSV.
 - **Tone Escalation:** Deterministic rules apply Stage 1–4 tone constraints, capping at 30+ days for manual review.
