@@ -1,5 +1,7 @@
 # Credit Follow-Up System | Travel Corporation India
 [Video Link](https://drive.google.com/file/d/1fr-MeOrd8g7-7WzYoU2cZfWaQclfV8c5/view?usp=sharing)
+
+[Presentation](https://docs.google.com/presentation/d/1KZx6SaMQf3SGReectr-G1GJ1P6_p3eRK/edit?usp=drive_link&ouid=113762171600464727172&rtpof=true&sd=true)
 ## Overview
 A credit follow-up tool that generates escalation emails for overdue invoices. The system applies a structured tone escalation matrix — starting with friendly reminders and progressing through formal notices — based on how many days each invoice is overdue.
 
